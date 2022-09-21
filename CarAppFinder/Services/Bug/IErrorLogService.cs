@@ -1,29 +1,24 @@
 ﻿using CarAppFinder.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using static CarAppFinder.Models.Pub.Pub;
 
 namespace CarAppFinder.Services.Bug
 {
     public interface IErrorLogService
     {
-        public Task RegisterError(Exception ex, User user = null);
+        public Task RegisterError(Exception ex, string userId = null);
     }
     public class ErrorLogService : IErrorLogService
     {
-        public ErrorLogService(DatabaseContext   context)
+        public ErrorLogService(DatabaseContext context)
         {
             Context = context;
         }
 
         public DatabaseContext Context { get; }
 
-        public async Task RegisterError(Exception ex, User user = null)
+        public async Task RegisterError(Exception ex, string userId = null)
         {
             foreach (EntityEntry entry in Context.ChangeTracker.Entries())
             {
@@ -42,13 +37,17 @@ namespace CarAppFinder.Services.Bug
                 }
             }
 
-            var error = new ErrorLog { StackTrace = ex.StackTrace, HelpLink = ex.HelpLink, HResult = ex.HResult, InnerException = ex.InnerException?.ToString() ?? ex.StackTrace, Message = ex.Message, Source = ex.Source, Date = DateTime.Now };
-
-            if (user != null)
+            var error = new ErrorLog
             {
-                error.UserId = user.Id;
-                error.UserName = user.UserName;
-            }
+                UserId = userId,
+                StackTrace = ex.StackTrace,
+                HelpLink = ex.HelpLink,
+                HResult = ex.HResult,
+                InnerException = ex.InnerException?.ToString() ?? ex.StackTrace,
+                Message = ex.Message,
+                Source = ex.Source,
+                Date = DateTime.Now
+            };
 
             await Context.Errors.AddAsync(error);
             await Context.SaveChangesAsync();
@@ -68,7 +67,6 @@ namespace CarAppFinder.Services.Bug
                     default: break;
                 }
             }
-
         }
     }
 }

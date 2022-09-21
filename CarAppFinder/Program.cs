@@ -23,16 +23,15 @@ builder.Configuration.Bind(nameof(Setting), Setting);
 
 AddServices(builder.Services);
 
-builder.Services.AddControllers(options =>
-                   options.Filters.Add(
-                       new HttpResponseExceptionFilter(builder.Services.BuildServiceProvider().GetService<IErrorLogService>())
-                   ))
-               .AddJsonOptions(options =>
-               {
-                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                   options.JsonSerializerOptions.IgnoreNullValues = true;
-               });
-
+builder.Services.AddControllers(config =>
+{
+    config.Filters.Add<HttpResponseExceptionFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
+ 
 var connectionString = new ConnectionString();
 builder.Configuration.Bind(nameof(connectionString), connectionString);
 
@@ -45,6 +44,7 @@ builder.Services.AddIdentity<User, IdentityRole>(opts =>
     opts.Password.RequireNonAlphanumeric = Setting.IsProduction;
     opts.Password.RequireLowercase = Setting.IsProduction;
     opts.Password.RequireUppercase = Setting.IsProduction;
+    opts.Password.RequireDigit = Setting.IsProduction;
     opts.Password.RequireDigit = Setting.IsProduction;
 }).AddEntityFrameworkStores<DatabaseContext>().AddDefaultTokenProviders();
 

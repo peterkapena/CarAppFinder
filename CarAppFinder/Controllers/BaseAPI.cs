@@ -78,16 +78,10 @@ namespace CarAppFinder.Controllers
                 throw new System.Security.Authentication.AuthenticationException("Invalid token received");
         }
 
-        internal virtual ObjectResult GetErrorMessageResponse(Exception ex, XUser xUser = null, string userId = null)
+        internal virtual async Task<ObjectResult> GetErrorMessageResponse(Exception ex, string useId = null, string userId = null)
         {
             SetReturnValue("error", "An error happened. Please contact support.");
-            if (userId != null)
-            {
-                _ = ErrorLogService.RegisterError(ex, UserManager?.FindByIdAsync(userId)?.Result);
-            }
-            else if (xUser != null)
-                _ = ErrorLogService.RegisterError(ex, xUser?.User);
-            else _ = ErrorLogService.RegisterError(ex);
+            await ErrorLogService.RegisterError(ex, useId);
 
             return StatusCode(500, ReturnValue);
         }

@@ -1,23 +1,17 @@
 ﻿using CarAppFinder.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace CarAppFinder.Services
 {
     public interface IUserService
     {
         public Task<IdentityResult> CreateAsync(XUser xUser);
-        public Task<string> GetAuthToken(XUser xUser);
+        public Task<string> GetAuthToken(User xUser);
     }
 
     public class UserService : IUserService
@@ -33,7 +27,10 @@ namespace CarAppFinder.Services
             User, Admin
         }
 
-        public UserService(UserManager<User> userMgr, DatabaseContext context, Setting.Setting setting, TokenValidationParameters tokenValidationParameters)
+        public UserService(UserManager<User> userMgr,
+                           DatabaseContext context,
+                           Setting.Setting setting,
+                           TokenValidationParameters tokenValidationParameters)
         {
             UserManager = userMgr;
             Context = context;
@@ -43,21 +40,24 @@ namespace CarAppFinder.Services
 
         public async Task<IdentityResult> CreateAsync(XUser xUser)
         {
-            xUser.User.UserName = (xUser.User.Name + (UserManager.Users.ToListAsync().Result.Count + 1))
-                .Trim().Replace(" ", "");
 
-            IdentityResult result = await UserManager.CreateAsync(xUser.User, xUser.User.PassWord);
+            var user = new User
+            {
+                Email = xUser.Email,
+                UserName = $"{UserManager.Users.ToListAsync().Result.Count + 1}"
+            };
+            IdentityResult result = await UserManager.CreateAsync(user, xUser.Password);
 
             return result;
         }
 
-        public async Task<string> GetAuthToken(XUser xUser)
+        public async Task<string> GetAuthToken(User user)
         {
-            var userRoles = await UserManager.GetRolesAsync(xUser.User);
+            var userRoles = await UserManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
                     {
-                        new Claim(JwtRegisteredClaimNames.Jti, xUser.User.Id),
-                        new Claim(ClaimTypes.Name, xUser.User.Name)
+                        new Claim(JwtRegisteredClaimNames.Jti, user.Id),
+                        new Claim(ClaimTypes.Name, user.Email)
                     };
 
             //Add the user roles in the claim so that the the role will be used for authorisation
@@ -79,7 +79,9 @@ namespace CarAppFinder.Services
 
     public class XUser
     {
-        public User User { get; set; }
+        public string Id { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
         public string TokenForAnonymous { get; set; }
     }
 }

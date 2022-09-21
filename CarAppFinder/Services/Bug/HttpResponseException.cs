@@ -22,7 +22,16 @@ namespace CarAppFinder.Services.Bug
                 Task.Run(() => ErrorLogService.RegisterError(context.Exception));
 
                 context.Result =
-                    new ObjectResult(new Dictionary<string, string> { { "error", "An error happened. Please contact support" } })
+                    new ObjectResult(new Dictionary<string, string> {
+                    {
+                            "error",
+                            "An error happened. Please contact support"
+                    },
+                    {
+                            "message",
+                            context.Exception.Message
+                    } } )
+
                     {
                         StatusCode = 500
                     };
