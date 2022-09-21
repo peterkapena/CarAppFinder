@@ -1,0 +1,11 @@
+﻿dotnet tool install --global dotnet-ef
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+
+
+…or push an existing repository from the command line
+git remote add origin https://github.com/peterkapena/CarAppFinderBackend.git
+git branch -M main
+git push -u origin main
+
