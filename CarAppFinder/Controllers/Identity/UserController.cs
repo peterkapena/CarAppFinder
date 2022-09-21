@@ -74,15 +74,11 @@ namespace CarAppFinder.Controllers.Identity
         }
         private static Dictionary<string, object> GetReturnForLogin(User u, string token)
         {
-            var user = new Dictionary<string, object>
+            return new Dictionary<string, object>
             {
                 { "id", u.Id },
                 { "email", u.Email },
-            };
-
-            return new Dictionary<string, object> {
                 { "token",token},
-                { "user", user },
             };
         }
     }
