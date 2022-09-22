@@ -37,7 +37,7 @@ namespace CarAppFinder.Controllers.Identity
         {
             try
             {
-                AuthenticateAnonymous(xUser.TokenForAnonymous);
+                //AuthenticateAnonymous(xUser.TokenForAnonymous);
 
                 var user = await UserManager.FindByEmailAsync(xUser.Email);
 
