@@ -9,6 +9,6 @@ namespace CarAppFinder.Models
         public string UserId { get; set; }
 
         public string TrackerId { get; set; }
-        public Tracker Tracker { get; set; }
+        public List<Coordinates> Coordinates { get; set; }
     }
 }

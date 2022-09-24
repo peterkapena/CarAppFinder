@@ -47,17 +47,17 @@ namespace CarAppFinder.Controllers
             }
         }
 
-        [HttpPost("AddTracker")]
-        public async Task<ActionResult> AddTracker([FromBody] Tracker tracker)
+        [HttpPost(nameof(AddCoordinate))]
+        public async Task<ActionResult> AddCoordinate([FromBody] Coordinates coordinates)
         {
             try
             {
-                await CarService.AddTracker(tracker);
+                await CarService.AddCoordinate(coordinates);
 
                 return Ok(new
                 {
-                    tracker.Id,
-                    tracker.Position,
+                    coordinates.CarId,
+                    coordinates.Coords
                 });
             }
             catch (Exception ex)

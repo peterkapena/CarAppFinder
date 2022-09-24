@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAppFinder.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220924082807_init")]
+    [Migration("20220924135125_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,11 +46,35 @@ namespace CarAppFinder.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TrackerId")
+                    b.HasIndex("TrackerId", "Id")
                         .IsUnique()
                         .HasFilter("[TrackerId] IS NOT NULL");
 
                     b.ToTable("Cars");
+                });
+
+            modelBuilder.Entity("CarAppFinder.Models.Coordinates", b =>
+                {
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CarId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("Archived")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("CarId1")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Coords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Time", "CarId");
+
+                    b.HasIndex("CarId1");
+
+                    b.ToTable("Coordinates");
                 });
 
             modelBuilder.Entity("CarAppFinder.Models.Pub.Pub+ErrorLog", b =>
@@ -91,22 +115,6 @@ namespace CarAppFinder.Migrations
                     b.HasKey("ErrorID");
 
                     b.ToTable("Errors");
-                });
-
-            modelBuilder.Entity("CarAppFinder.Models.Tracker", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("Archived")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Position")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Trackers");
                 });
 
             modelBuilder.Entity("CarAppFinder.Models.User", b =>
@@ -313,13 +321,13 @@ namespace CarAppFinder.Migrations
                     b.ToTable("UserToken", (string)null);
                 });
 
-            modelBuilder.Entity("CarAppFinder.Models.Car", b =>
+            modelBuilder.Entity("CarAppFinder.Models.Coordinates", b =>
                 {
-                    b.HasOne("CarAppFinder.Models.Tracker", "Tracker")
-                        .WithOne("Car")
-                        .HasForeignKey("CarAppFinder.Models.Car", "TrackerId");
+                    b.HasOne("CarAppFinder.Models.Car", "Car")
+                        .WithMany("Coordinates")
+                        .HasForeignKey("CarId1");
 
-                    b.Navigation("Tracker");
+                    b.Navigation("Car");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -373,9 +381,9 @@ namespace CarAppFinder.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CarAppFinder.Models.Tracker", b =>
+            modelBuilder.Entity("CarAppFinder.Models.Car", b =>
                 {
-                    b.Navigation("Car");
+                    b.Navigation("Coordinates");
                 });
 #pragma warning restore 612, 618
         }

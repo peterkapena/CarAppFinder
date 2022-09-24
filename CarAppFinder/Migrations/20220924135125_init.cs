@@ -10,6 +10,22 @@ namespace CarAppFinder.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Cars",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TrackerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Archived = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cars", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Errors",
                 columns: table => new
                 {
@@ -45,19 +61,6 @@ namespace CarAppFinder.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Trackers",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Archived = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Trackers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
@@ -85,6 +88,26 @@ namespace CarAppFinder.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Coordinates",
+                columns: table => new
+                {
+                    Time = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CarId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Coords = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CarId1 = table.Column<long>(type: "bigint", nullable: true),
+                    Archived = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Coordinates", x => new { x.Time, x.CarId });
+                    table.ForeignKey(
+                        name: "FK_Coordinates_Cars_CarId1",
+                        column: x => x.CarId1,
+                        principalTable: "Cars",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RoleClaim",
                 columns: table => new
                 {
@@ -103,27 +126,6 @@ namespace CarAppFinder.Migrations
                         principalTable: "Role",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Cars",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TrackerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Archived = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Cars", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Cars_Trackers_TrackerId",
-                        column: x => x.TrackerId,
-                        principalTable: "Trackers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -212,11 +214,16 @@ namespace CarAppFinder.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cars_TrackerId",
+                name: "IX_Cars_TrackerId_Id",
                 table: "Cars",
-                column: "TrackerId",
+                columns: new[] { "TrackerId", "Id" },
                 unique: true,
                 filter: "[TrackerId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Coordinates_CarId1",
+                table: "Coordinates",
+                column: "CarId1");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
@@ -261,7 +268,7 @@ namespace CarAppFinder.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Cars");
+                name: "Coordinates");
 
             migrationBuilder.DropTable(
                 name: "Errors");
@@ -282,7 +289,7 @@ namespace CarAppFinder.Migrations
                 name: "UserToken");
 
             migrationBuilder.DropTable(
-                name: "Trackers");
+                name: "Cars");
 
             migrationBuilder.DropTable(
                 name: "Role");

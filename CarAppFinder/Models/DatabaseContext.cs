@@ -11,7 +11,7 @@ namespace CarAppFinder.Models
     {
         public DbSet<ErrorLog> Errors { get; set; }
         public DbSet<Car> Cars { get; set; }
-        public DbSet<Tracker> Trackers { get; set; }
+        public DbSet<Coordinates> Coordinates { get; set; }
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
@@ -55,6 +55,13 @@ namespace CarAppFinder.Models
             {
                 entity.ToTable("UserToken");
             });
+
+            modelBuilder.Entity<Car>()
+                .HasIndex(c => new { c.TrackerId, c.Id })
+                .IsUnique(true);
+            modelBuilder.Entity<Coordinates>()
+                 .HasKey(c => new { c.Time, c.CarId });
+
         }
     }
     public class ConnectionString
