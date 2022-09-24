@@ -10,6 +10,8 @@ namespace CarAppFinder.Models
     public class DatabaseContext : IdentityDbContext<User>
     {
         public DbSet<ErrorLog> Errors { get; set; }
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<Tracker> Trackers { get; set; }
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {

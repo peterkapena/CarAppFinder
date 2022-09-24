@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CarAppFinder.Controllers.Identity
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : BaseAPI
@@ -19,18 +18,18 @@ namespace CarAppFinder.Controllers.Identity
                               Services.Setting.Setting setting,
                               RoleManager<IdentityRole> roleManager,
                               IUserService userService,
-                              IErrorLogService errorLogService,
-                              TokenValidationParameters tokenValidationParameters)
-         : base(userMgr: userMgr, context: context, setting: setting, roleManager: roleManager, errorLogService: errorLogService)
+                              IErrorLogService errorLogService)
+         : base(userMgr: userMgr,
+                context: context,
+                setting: setting,
+                roleManager: roleManager,
+                errorLogService: errorLogService)
         {
             UserService = userService;
-            TokenValidationParameters = tokenValidationParameters;
         }
 
         public IUserService UserService { get; }
-        public TokenValidationParameters TokenValidationParameters { get; }
 
-        [AllowAnonymous]
         #endregion.
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] XUser xUser)
@@ -47,8 +46,8 @@ namespace CarAppFinder.Controllers.Identity
                     if (result.Succeeded)
                     {
                         user = await UserManager.FindByEmailAsync(xUser.Email);
-                        string token = await UserService.GetAuthToken(user);
-                        ReturnValue = GetReturnForLogin(user, token);
+                        //string token = await UserService.GetAuthToken(user);
+                        ReturnValue = GetReturnForLogin(user);
                     }
                     else SetReturnValue("error", result.Errors.ToList());
                 }
@@ -56,8 +55,8 @@ namespace CarAppFinder.Controllers.Identity
                 {
                     if (await UserManager.CheckPasswordAsync(user, xUser.Password))
                     {
-                        string token = await UserService.GetAuthToken(user);
-                        ReturnValue = GetReturnForLogin(user, token);
+                        //string token = await UserService.GetAuthToken(user);
+                        ReturnValue = GetReturnForLogin(user);
                     }
                     else
                     {
@@ -72,14 +71,13 @@ namespace CarAppFinder.Controllers.Identity
                 return await GetErrorMessageResponse(ex, xUser.Email);
             }
         }
-        private static Dictionary<string, object> GetReturnForLogin(User u, string token)
+        private static Dictionary<string, object> GetReturnForLogin(User u)
         {
             return new Dictionary<string, object>
             {
                 { "id", u.Id },
                 { "email", u.Email },
-                { "token",token},
-            };
+             };
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using CarAppFinder.Models;
-using CarAppFinder.Services;
 using CarAppFinder.Services.Bug;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +28,7 @@ namespace CarAppFinder.Controllers
                     User user = null;
                     try
                     {
-                        var claimsIdentity = this.User.Identity as ClaimsIdentity;
+                        var claimsIdentity = User.Identity as ClaimsIdentity;
                         var userId = claimsIdentity.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
                         user = await UserManager.FindByIdAsync(userId);
                     }
@@ -78,10 +77,16 @@ namespace CarAppFinder.Controllers
                 throw new System.Security.Authentication.AuthenticationException("Invalid token received");
         }
 
-        internal virtual async Task<ObjectResult> GetErrorMessageResponse(Exception ex, string useId = null, string userId = null)
+        internal virtual async Task<ObjectResult> GetErrorMessageResponse(Exception ex, string userId = null)
         {
+            var user = (await AuthenticatedUser);
+            if (user is not null)
+            {
+                userId = user.Id;
+            }
+
             SetReturnValue("error", "An error happened. Please contact support.");
-            await ErrorLogService.RegisterError(ex, useId);
+            await ErrorLogService.RegisterError(ex, userId);
 
             return StatusCode(500, ReturnValue);
         }

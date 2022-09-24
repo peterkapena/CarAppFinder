@@ -5,6 +5,6 @@
         public string Issuer { get; set; }
         public string IssuerSigningKey { get; set; }
         public string Audience { get; set; }
-        public double TokenLifeTime { get; set; }
+        public int TokenLifeTime { get; set; }
     }
 }

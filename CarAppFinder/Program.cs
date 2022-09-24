@@ -31,7 +31,7 @@ builder.Services.AddControllers(config =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
- 
+
 var connectionString = new ConnectionString();
 builder.Configuration.Bind(nameof(connectionString), connectionString);
 
@@ -56,6 +56,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+   
     app.UseSwaggerUI();
 }
 
@@ -69,9 +70,16 @@ app.Run();
 
 void AddServices(IServiceCollection services)
 {
+    services.AddSwaggerGen(c => {
+        c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+        c.IgnoreObsoleteActions();
+        c.IgnoreObsoleteProperties();
+        c.CustomSchemaIds(type => type.FullName);
+    });
     services.AddSingleton(Setting);
     services.AddScoped<IUserService, UserService>();
     services.AddTransient<IErrorLogService, ErrorLogService>();
+    services.AddTransient<ICarService, CarService>();
 }
 
 void AddAuthentication(IServiceCollection services)
@@ -87,7 +95,7 @@ void AddAuthentication(IServiceCollection services)
         ClockSkew = TimeSpan.Zero,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Setting.JwtSetting.IssuerSigningKey))
     };
-    services.AddSingleton(tokenValidationParameters);
+    //services.AddSingleton(tokenValidationParameters);
 
     services.AddAuthentication(options =>
     {
