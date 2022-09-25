@@ -1,5 +1,6 @@
 ﻿using CarAppFinder.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CarAppFinder.Services
 {
@@ -11,6 +12,7 @@ namespace CarAppFinder.Services
         public Task<IEnumerable<Car>> GetCars(string userId);
         public Task DeleteCar(string TrackerSerialNumber);
         public Task UpdateCar(Car car, string tsn);
+        Task<Coordinates> GetRecentCoord(string tsn);
     }
 
     public class CarService : ICarService
@@ -28,7 +30,7 @@ namespace CarAppFinder.Services
 
             if (existingCar is not null)
                 throw new InvalidDataException("This tracker has been already used.");
-            
+
             car = (await Context.Cars.AddAsync(car)).Entity;
             await Context.SaveChangesAsync();
 
@@ -87,6 +89,17 @@ namespace CarAppFinder.Services
             await Context.Coordinates.AddAsync(x);
             await Context.SaveChangesAsync();
             return x;
+        }
+
+        public async Task<Coordinates> GetRecentCoord(string tsn)
+        {
+            if (tsn.IsNullOrEmpty()) throw new InvalidDataException("invalid serial number");
+
+            var coord = await Context.Coordinates.Where(crd => crd.CarTrackerSerialNumber == tsn)
+                .OrderByDescending(crd => crd.Time)
+                .FirstOrDefaultAsync();
+            if (coord is null) throw new InvalidDataException("no data received for this car yet");
+            return coord;
         }
     }
 }

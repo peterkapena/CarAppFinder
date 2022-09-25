@@ -46,26 +46,6 @@ namespace CarAppFinder.Controllers
             }
         }
 
-        [HttpPost(nameof(AddCoordinate))]
-        public async Task<ActionResult> AddCoordinate([FromBody] Coordinates coord)
-        {
-            try
-            {
-                await CarService.AddCoordinate(coord);
-
-                return Ok(new
-                {
-                    coord.CarTrackerSerialNumber,
-                    coord.Coords,
-                    coord.Time
-                });
-            }
-            catch (Exception ex)
-            {
-                return await GetErrorMessageResponse(ex);
-            }
-        }
-
         [HttpGet]
         [Route("{tsn}")]
         public async Task<ActionResult> Get(string tsn)
@@ -110,19 +90,42 @@ namespace CarAppFinder.Controllers
                 return await GetErrorMessageResponse(ex);
             }
         }
-        //[HttpPatch]
-        //[Route("{tsn}")]
-        //public async Task<ActionResult> UpdateCar([FromBody] Car car, string tsn)
-        //{
-        //    try
-        //    {
-        //        await CarService.UpdateCar(car, tsn);
-        //        return Ok(car);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return await GetErrorMessageResponse(ex);
-        //    }
-        //}
+
+        [HttpPost(nameof(AddCoordinate))]
+        public async Task<ActionResult> AddCoordinate([FromBody] Coordinates coord)
+        {
+            try
+            {
+                await CarService.AddCoordinate(coord);
+
+                return Ok(new
+                {
+                    coord.CarTrackerSerialNumber,
+                    coord.Coords,
+                    coord.Time
+                });
+            }
+            catch (Exception ex)
+            {
+                return await GetErrorMessageResponse(ex);
+            }
+        }
+
+        [HttpGet]
+        [Route("[action]/{tsn}")]
+        public async Task<ActionResult> GetRecentCoord(string tsn)
+        {
+            try
+            {
+                var coord = await CarService.GetRecentCoord(tsn);
+
+                return Ok(coord?.Coords);
+            }
+            catch (Exception ex)
+            {
+                return await GetErrorMessageResponse(ex);
+            }
+        }
+
     }
 }
