@@ -127,5 +127,26 @@ namespace CarAppFinder.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("[action]/{tsn}")]
+        public async Task<ActionResult> GetHistory(string tsn)
+        {
+            try
+            {
+                var coords = await CarService.GetHistory(tsn);
+
+                List<string> sas = new();
+                foreach (var coord in coords)
+                {
+                    sas.Add(coord.Coords);
+                }
+
+                return Ok(sas);
+            }
+            catch (Exception ex)
+            {
+                return await GetErrorMessageResponse(ex);
+            }
+        }
     }
 }

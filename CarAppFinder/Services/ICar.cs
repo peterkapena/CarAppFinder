@@ -13,6 +13,7 @@ namespace CarAppFinder.Services
         public Task DeleteCar(string TrackerSerialNumber);
         public Task UpdateCar(Car car, string tsn);
         Task<Coordinates> GetRecentCoord(string tsn);
+        Task<List<Coordinates>> GetHistory(string tsn);
     }
 
     public class CarService : ICarService
@@ -100,6 +101,12 @@ namespace CarAppFinder.Services
                 .FirstOrDefaultAsync();
             if (coord is null) throw new InvalidDataException("no data received for this car yet");
             return coord;
+        }
+
+        public async Task<List<Coordinates>> GetHistory(string tsn)
+        {
+            if (tsn.IsNullOrEmpty()) throw new InvalidDataException("invalid serial number");
+            return await Context.Coordinates.Where(crd => crd.CarTrackerSerialNumber == tsn).ToListAsync();
         }
     }
 }

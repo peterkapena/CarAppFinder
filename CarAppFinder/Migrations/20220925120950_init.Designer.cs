@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAppFinder.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220925082720_init")]
+    [Migration("20220925120950_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

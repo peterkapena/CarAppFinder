@@ -56,7 +56,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-   
+
     app.UseSwaggerUI();
 }
 
@@ -65,12 +65,14 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseCors("MyAllowAllHeadersPolicy");
 
 app.Run();
 
 void AddServices(IServiceCollection services)
 {
-    services.AddSwaggerGen(c => {
+    services.AddSwaggerGen(c =>
+    {
         c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
         c.IgnoreObsoleteActions();
         c.IgnoreObsoleteProperties();
@@ -80,6 +82,13 @@ void AddServices(IServiceCollection services)
     services.AddScoped<IUserService, UserService>();
     services.AddTransient<IErrorLogService, ErrorLogService>();
     services.AddTransient<ICarService, CarService>();
+    var MyAllowAllHeadersPolicy = "MyAllowAllHeadersPolicy";
+
+    services.AddCors(options =>
+    {
+        options.AddPolicy(name: MyAllowAllHeadersPolicy,
+                          policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    });
 }
 
 void AddAuthentication(IServiceCollection services)
