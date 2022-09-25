@@ -34,42 +34,33 @@ namespace CarAppFinder.Controllers.Identity
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] XUser xUser)
         {
-            try
+            var user = await UserManager.FindByEmailAsync(xUser.Email);
+
+            if (user is null)
             {
-                //AuthenticateAnonymous(xUser.TokenForAnonymous);
-
-                var user = await UserManager.FindByEmailAsync(xUser.Email);
-
-                if (user is null)
+                var result = await UserService.CreateAsync(xUser);
+                if (result.Succeeded)
                 {
-                    var result = await UserService.CreateAsync(xUser);
-                    if (result.Succeeded)
-                    {
-                        user = await UserManager.FindByEmailAsync(xUser.Email);
-                        //string token = await UserService.GetAuthToken(user);
-                        ReturnValue = GetReturnForLogin(user);
-                    }
-                    else SetReturnValue("error", result.Errors.ToList());
+                    user = await UserManager.FindByEmailAsync(xUser.Email);
+                    //string token = await UserService.GetAuthToken(user);
+                    ReturnValue = GetReturnForLogin(user);
+                }
+                else SetReturnValue("error", result.Errors.ToList());
+            }
+            else
+            {
+                if (await UserManager.CheckPasswordAsync(user, xUser.Password))
+                {
+                    //string token = await UserService.GetAuthToken(user);
+                    ReturnValue = GetReturnForLogin(user);
                 }
                 else
                 {
-                    if (await UserManager.CheckPasswordAsync(user, xUser.Password))
-                    {
-                        //string token = await UserService.GetAuthToken(user);
-                        ReturnValue = GetReturnForLogin(user);
-                    }
-                    else
-                    {
-                        SetReturnValue("error", "Login failed");
-                        return Unauthorized(ReturnValue);
-                    }
+                    SetReturnValue("error", "Login failed");
+                    return Unauthorized(ReturnValue);
                 }
-                return Ok(ReturnValue);
             }
-            catch (Exception ex)
-            {
-                return await GetErrorMessageResponse(ex, xUser.Email);
-            }
+            return Ok(ReturnValue);
         }
         private static Dictionary<string, object> GetReturnForLogin(User u)
         {

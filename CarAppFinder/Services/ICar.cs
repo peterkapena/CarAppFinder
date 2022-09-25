@@ -1,18 +1,16 @@
 ﻿using CarAppFinder.Models;
 using Microsoft.EntityFrameworkCore;
-using NuGet.DependencyResolver;
 
 namespace CarAppFinder.Services
 {
     public interface ICarService
     {
         public Task<Car> AddCar(Car car);
-        //public Task<Tracker> AddTracker(Tracker car);
         public Task<Coordinates> AddCoordinate(Coordinates coordinates);
-        public Task<Car> GetCar(long Id);
+        public Task<Car> GetCar(string TrackerSerialNumber);
         public Task<IEnumerable<Car>> GetCars(string userId);
-        public Task DeleteCar(long Id);
-        public Task UpdateCar(Car car);
+        public Task DeleteCar(string TrackerSerialNumber);
+        public Task UpdateCar(Car car, string tsn);
     }
 
     public class CarService : ICarService
@@ -23,53 +21,53 @@ namespace CarAppFinder.Services
         {
             Context = context;
         }
-        public Task<List<Car>> Cars => Context.Cars.Where(x => !x.Archived).ToListAsync();
-        public Task<List<Coordinates>> Coordinates => Context.Coordinates.Where(x => !x.Archived).ToListAsync();
 
-        public async Task<Car> AddCar(Car c)
+        public async Task<Car> AddCar(Car car)
         {
-            var car = new Car
-            {
-                Name = c.Name,
-                TrackerId = c.TrackerId,
-                UserId = c.UserId
-            };
+            var existingCar = await Context.Cars.Where(c => c.TrackerSerialNumber == car.TrackerSerialNumber).FirstOrDefaultAsync();
 
-            //if (!(await Coordinates).Any(t => t.Id == c.TrackerId))
-            //{
-            //    await Context.Trackers.AddAsync(new Tracker { Id = c.TrackerId });
-            //}
-
+            if (existingCar is not null)
+                throw new InvalidDataException("This tracker has been already used.");
+            
             car = (await Context.Cars.AddAsync(car)).Entity;
             await Context.SaveChangesAsync();
 
             return car;
         }
 
-        public async Task<Car> GetCar(long Id)
+        public Task<Car> GetCar(string TrackerSerialNumber)
         {
-            var car = (await Cars).Where(x => x.Id == Id).FirstOrDefault();
-            return car;
+            var car = Context.Cars.Where(x => x.TrackerSerialNumber == TrackerSerialNumber).FirstOrDefault();
+            return Task.FromResult(car);
         }
 
-        public async Task DeleteCar(long Id)
+        public async Task DeleteCar(string TrackerSerialNumber)
         {
-            var car = (await Cars).Where(x => x.Id == Id).FirstOrDefault();
-            if (car is null) throw new Exception("car not found");
+            var car = Context.Cars.Where(x => x.TrackerSerialNumber == TrackerSerialNumber).FirstOrDefault();
+            if (car is null) throw new InvalidDataException("car not found");
 
-            car.Archived = true;
-
-            Context.Cars.Update(car);
+            Context.Cars.Remove(car);
 
             await Context.SaveChangesAsync();
         }
 
-        public async Task UpdateCar(Car car)
+        public async Task UpdateCar(Car car, string tsn)
         {
-            var carToUpdate = await Context.Cars.Where(x => x.Id == car.Id).FirstOrDefaultAsync(); //(await Cars).Where(x => x.Id == car.Id).FirstOrDefault();
-            if (carToUpdate is null) throw new Exception("car not found");
+            if (car.TrackerSerialNumber == tsn) return;
 
-            carToUpdate.Name = car.Name;
+            if (await Context.Cars.AnyAsync(c => c.TrackerSerialNumber == tsn)) throw new InvalidDataException("this tracker has already been used.");
+
+            var carToUpdate = await Context.Cars.Where(x => x.TrackerSerialNumber == car.TrackerSerialNumber).FirstOrDefaultAsync();
+            if (carToUpdate is null) throw new InvalidDataException("car not found");
+
+            //update coordinates
+            //var friends = Context.Coordinates.Where(coord => coord.CarTrackerSerialNumber == car.TrackerSerialNumber).ToList();
+            //friends.ForEach(a => a.CarTrackerSerialNumber = tsn);
+            //await Context.SaveChangesAsync();
+
+            //update car CarTrackerSerialNumber
+            carToUpdate.Coordinates.ForEach(a => a.CarTrackerSerialNumber = tsn);
+            carToUpdate.TrackerSerialNumber = tsn;
 
             Context.Cars.Update(carToUpdate);
 
@@ -78,22 +76,17 @@ namespace CarAppFinder.Services
 
         public async Task<IEnumerable<Car>> GetCars(string userId)
         {
-            return (await Cars).Where(x => x.UserId == userId);
+            return await Context.Cars.Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<Coordinates> AddCoordinate(Coordinates coordinates)
+        public async Task<Coordinates> AddCoordinate(Coordinates x)
         {
-            //var tracker = (await Coordinates).Where(x => x.Id == t.Id).FirstOrDefault();
+            if (!await Context.Cars.AnyAsync(car => car.TrackerSerialNumber == x.CarTrackerSerialNumber))
+                throw new InvalidDataException("no car found for this coord");
 
-            //if (tracker is null)
-            //{
-            //    tracker = new Tracker { Id = t.Id, };
-            //    //await Context.Trackers.AddAsync(tracker);
-            //    await Context.SaveChangesAsync();
-            //}
-
-
-            return coordinates;
+            await Context.Coordinates.AddAsync(x);
+            await Context.SaveChangesAsync();
+            return x;
         }
     }
 }

@@ -1,14 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Threading.Tasks;
 
 namespace CarAppFinder.Models.Pub
 {
     public partial class Pub
     {
+        public enum StatusCode
+        {
+            InternalServerError = 500,
+            InvalidData = 400
+        }
         public class ErrorLog
         {
             [Key]

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using static CarAppFinder.Models.Pub.Pub;
 
 namespace CarAppFinder.Services.Bug
 {
@@ -21,20 +22,26 @@ namespace CarAppFinder.Services.Bug
             {
                 Task.Run(() => ErrorLogService.RegisterError(context.Exception));
 
-                context.Result =
-                    new ObjectResult(new Dictionary<string, string> {
+                var msg = "An error happened. Please contact support";
+
+                if (context.Exception.GetType() == typeof(InvalidDataException))
+                {
+                    msg = context.Exception.Message;
+                }
+
+                context.Result = new ObjectResult(new Dictionary<string, string> {
                     {
                             "error",
-                            "An error happened. Please contact support"
+                            msg
                     },
                     {
                             "message",
                             context.Exception.Message
-                    } } )
+                    } })
 
-                    {
-                        StatusCode = 500
-                    };
+                {
+                    StatusCode = (int)StatusCode.InternalServerError
+                };
                 context.ExceptionHandled = true;
             }
         }

@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Net;
 using static CarAppFinder.Models.Pub.Pub;
 
 namespace CarAppFinder.Models
@@ -16,7 +14,6 @@ namespace CarAppFinder.Models
             : base(options)
         {
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -56,12 +53,10 @@ namespace CarAppFinder.Models
                 entity.ToTable("UserToken");
             });
 
-            modelBuilder.Entity<Car>()
-                .HasIndex(c => new { c.TrackerId, c.Id })
-                .IsUnique(true);
-            modelBuilder.Entity<Coordinates>()
-                 .HasKey(c => new { c.Time, c.CarId });
+            modelBuilder.Entity<Car>().HasKey(c => c.TrackerSerialNumber);
 
+            modelBuilder.Entity<Coordinates>()
+                 .HasKey(c => new { c.Time, c.CarTrackerSerialNumber });
         }
     }
     public class ConnectionString

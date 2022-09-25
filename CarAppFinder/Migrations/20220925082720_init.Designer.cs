@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAppFinder.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220924135125_init")]
+    [Migration("20220925082720_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,29 +26,16 @@ namespace CarAppFinder.Migrations
 
             modelBuilder.Entity("CarAppFinder.Models.Car", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
-
-                    b.Property<bool>("Archived")
-                        .HasColumnType("bit");
+                    b.Property<string>("TrackerSerialNumber")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TrackerId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrackerId", "Id")
-                        .IsUnique()
-                        .HasFilter("[TrackerId] IS NOT NULL");
+                    b.HasKey("TrackerSerialNumber");
 
                     b.ToTable("Cars");
                 });
@@ -58,21 +45,15 @@ namespace CarAppFinder.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CarId")
+                    b.Property<string>("CarTrackerSerialNumber")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("Archived")
-                        .HasColumnType("bit");
-
-                    b.Property<long?>("CarId1")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Coords")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Time", "CarId");
+                    b.HasKey("Time", "CarTrackerSerialNumber");
 
-                    b.HasIndex("CarId1");
+                    b.HasIndex("CarTrackerSerialNumber");
 
                     b.ToTable("Coordinates");
                 });
@@ -325,7 +306,9 @@ namespace CarAppFinder.Migrations
                 {
                     b.HasOne("CarAppFinder.Models.Car", "Car")
                         .WithMany("Coordinates")
-                        .HasForeignKey("CarId1");
+                        .HasForeignKey("CarTrackerSerialNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Car");
                 });

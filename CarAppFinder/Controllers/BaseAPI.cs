@@ -1,4 +1,5 @@
 ﻿using CarAppFinder.Models;
+using CarAppFinder.Models.Pub;
 using CarAppFinder.Services.Bug;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -85,10 +86,21 @@ namespace CarAppFinder.Controllers
                 userId = user.Id;
             }
 
-            SetReturnValue("error", "An error happened. Please contact support.");
+            ResponseError responseError = new()
+            {
+                Message = "An error happened. Please contact support",
+                StatusCode = (int)Pub.StatusCode.InternalServerError
+            };
+
+            if (ex.GetType() == typeof(InvalidDataException))
+            {
+                responseError.Message = ex.Message;
+                responseError.StatusCode = (int)Pub.StatusCode.InvalidData;
+            }
+
             await ErrorLogService.RegisterError(ex, userId);
 
-            return StatusCode(500, ReturnValue);
+            return StatusCode((int)responseError.StatusCode, responseError);
         }
     }
 }

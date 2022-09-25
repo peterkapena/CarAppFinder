@@ -13,16 +13,13 @@ namespace CarAppFinder.Migrations
                 name: "Cars",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TrackerSerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TrackerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Archived = table.Column<bool>(type: "bit", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Cars", x => x.Id);
+                    table.PrimaryKey("PK_Cars", x => x.TrackerSerialNumber);
                 });
 
             migrationBuilder.CreateTable(
@@ -92,19 +89,18 @@ namespace CarAppFinder.Migrations
                 columns: table => new
                 {
                     Time = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CarId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Coords = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CarId1 = table.Column<long>(type: "bigint", nullable: true),
-                    Archived = table.Column<bool>(type: "bit", nullable: false)
+                    CarTrackerSerialNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Coords = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Coordinates", x => new { x.Time, x.CarId });
+                    table.PrimaryKey("PK_Coordinates", x => new { x.Time, x.CarTrackerSerialNumber });
                     table.ForeignKey(
-                        name: "FK_Coordinates_Cars_CarId1",
-                        column: x => x.CarId1,
+                        name: "FK_Coordinates_Cars_CarTrackerSerialNumber",
+                        column: x => x.CarTrackerSerialNumber,
                         principalTable: "Cars",
-                        principalColumn: "Id");
+                        principalColumn: "TrackerSerialNumber",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -214,16 +210,9 @@ namespace CarAppFinder.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cars_TrackerId_Id",
-                table: "Cars",
-                columns: new[] { "TrackerId", "Id" },
-                unique: true,
-                filter: "[TrackerId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Coordinates_CarId1",
+                name: "IX_Coordinates_CarTrackerSerialNumber",
                 table: "Coordinates",
-                column: "CarId1");
+                column: "CarTrackerSerialNumber");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",

@@ -32,14 +32,13 @@ namespace CarAppFinder.Controllers
             try
             {
                 await CarService.AddCar(car);
-                SetReturnValue("car", new
+
+                return Ok(new
                 {
-                    car.Id,
                     car.Name,
-                    car.TrackerId,
+                    car.TrackerSerialNumber,
                     car.UserId
                 });
-                return Ok(ReturnValue);
             }
             catch (Exception ex)
             {
@@ -48,16 +47,17 @@ namespace CarAppFinder.Controllers
         }
 
         [HttpPost(nameof(AddCoordinate))]
-        public async Task<ActionResult> AddCoordinate([FromBody] Coordinates coordinates)
+        public async Task<ActionResult> AddCoordinate([FromBody] Coordinates coord)
         {
             try
             {
-                await CarService.AddCoordinate(coordinates);
+                await CarService.AddCoordinate(coord);
 
                 return Ok(new
                 {
-                    coordinates.CarId,
-                    coordinates.Coords
+                    coord.CarTrackerSerialNumber,
+                    coord.Coords,
+                    coord.Time
                 });
             }
             catch (Exception ex)
@@ -67,12 +67,12 @@ namespace CarAppFinder.Controllers
         }
 
         [HttpGet]
-        [Route("{Id}")]
-        public async Task<ActionResult> Get(long Id)
+        [Route("{tsn}")]
+        public async Task<ActionResult> Get(string tsn)
         {
             try
             {
-                var car = await CarService.GetCar(Id);
+                var car = await CarService.GetCar(tsn);
                 return Ok(car);
             }
             catch (Exception ex)
@@ -97,12 +97,12 @@ namespace CarAppFinder.Controllers
         }
 
         [HttpDelete]
-        [Route("{Id}")]
-        public async Task<ActionResult> Delete(long Id)
+        [Route("{tsn}")]
+        public async Task<ActionResult> Delete(string tsn)
         {
             try
             {
-                await CarService.DeleteCar(Id);
+                await CarService.DeleteCar(tsn);
                 return Ok();
             }
             catch (Exception ex)
@@ -110,18 +110,19 @@ namespace CarAppFinder.Controllers
                 return await GetErrorMessageResponse(ex);
             }
         }
-        [HttpPatch]
-        public async Task<ActionResult> UpdateCar([FromBody] Car car)
-        {
-            try
-            {
-                await CarService.UpdateCar(car);
-                return Ok(car);
-            }
-            catch (Exception ex)
-            {
-                return await GetErrorMessageResponse(ex);
-            }
-        }
+        //[HttpPatch]
+        //[Route("{tsn}")]
+        //public async Task<ActionResult> UpdateCar([FromBody] Car car, string tsn)
+        //{
+        //    try
+        //    {
+        //        await CarService.UpdateCar(car, tsn);
+        //        return Ok(car);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return await GetErrorMessageResponse(ex);
+        //    }
+        //}
     }
 }
