@@ -40,12 +40,11 @@ builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(S
 builder.Services.AddIdentity<User, IdentityRole>(opts =>
 {
     opts.User.RequireUniqueEmail = Setting.IsProduction;
-    opts.Password.RequiredLength = 4;
-    opts.Password.RequireNonAlphanumeric = Setting.IsProduction;
-    opts.Password.RequireLowercase = Setting.IsProduction;
-    opts.Password.RequireUppercase = Setting.IsProduction;
-    opts.Password.RequireDigit = Setting.IsProduction;
-    opts.Password.RequireDigit = Setting.IsProduction;
+    opts.Password.RequiredLength = 6;
+    opts.Password.RequireNonAlphanumeric = false;
+    opts.Password.RequireLowercase = false;
+    opts.Password.RequireUppercase = false;
+    opts.Password.RequireDigit = false;
 }).AddEntityFrameworkStores<DatabaseContext>().AddDefaultTokenProviders();
 
 AddAuthentication(builder.Services);
